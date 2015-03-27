@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>@nadavc</title>
-    <link>http://localhost:1313/</link>
+    <link>http://nadavc.com/</link>
     <description>Recent content on @nadavc</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 22 Mar 2015 00:00:00 -0700</lastBuildDate>
-    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://nadavc.com/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Object Oriented Selenium</title>
-      <link>http://localhost:1313/posts/object-oriented-selenium/</link>
+      <link>http://nadavc.com/posts/object-oriented-selenium/</link>
       <pubDate>Sun, 22 Mar 2015 00:00:00 -0700</pubDate>
       
-      <guid>http://localhost:1313/posts/object-oriented-selenium/</guid>
+      <guid>http://nadavc.com/posts/object-oriented-selenium/</guid>
       <description>
 
 &lt;p&gt;&lt;a href=&#34;http://seleniumhq.com&#34;&gt;Selenium&lt;/a&gt; is an awesome browser automation framework. It saves my team a ton of work on a daily basis. Even the name is &lt;a href=&#34;http://en.wikipedia.org/wiki/Selenium_%28software%29#History&#34;&gt;incredibly&lt;/a&gt; clever:&lt;/p&gt;
@@ -92,7 +92,7 @@
 
 &lt;p&gt;Most webpages contain repeated blocks that can be abstracted into a single PageObject class. Makes sense when you look at the following screenshot:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/imgs/selenium-repeated-objects.png&#34; alt=&#34;Repeated blocks&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/selenium-repeated-objects.png&#34; alt=&#34;Repeated blocks&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;But how do you tell Selenium to confine @FindBy to search &lt;em&gt;only&lt;/em&gt; for the right &lt;code&gt;.repo-list-name&lt;/code&gt;? Luckily, Selenium supports the notion of &lt;code&gt;context&lt;/code&gt; - whereas you get to define the root of @FindBy’s search. The trick is to call &lt;code&gt;PageFactory.initElements()&lt;/code&gt; with a custom &lt;code&gt;ElementLocatorFactory&lt;/code&gt;. See &lt;code&gt;SearchSegment.java&lt;/code&gt; for a more concrete example.&lt;/p&gt;
@@ -111,10 +111,10 @@
     
     <item>
       <title>Genesis</title>
-      <link>http://localhost:1313/posts/genesis/</link>
+      <link>http://nadavc.com/posts/genesis/</link>
       <pubDate>Sun, 15 Mar 2015 01:46:11 -0700</pubDate>
       
-      <guid>http://localhost:1313/posts/genesis/</guid>
+      <guid>http://nadavc.com/posts/genesis/</guid>
       <description>&lt;p&gt;This is my third attempt at a blog. Why start another one? I have plenty of reasons &lt;strong&gt;not&lt;/strong&gt; to. It&amp;rsquo;s time consuming, difficult, irrelevant, boring, repetitive…  But I also have good reasons. I want to improve at articulating my ideas and keep a journal of my learnings (professionally or otherwise). I will try my best to post original content and stay out of clichés, but I can&amp;rsquo;t promise anything :-)&lt;/p&gt;
 </description>
     </item>
