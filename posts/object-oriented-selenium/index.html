@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>
+  Object Oriented Selenium
+</title>
+<link rel="stylesheet" href="http://localhost:1313//css/reset.css">
+<link rel="stylesheet" href="http://localhost:1313//css/layout.css">
+<script src="http://localhost:1313//js/highlight.pack.js"></script>
+<link rel="stylesheet" href="http://localhost:1313//css/github.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,700,300italic,700italic" rel="stylesheet" type="text/css">
+<link href="http://localhost:1313//css/hover.css" rel="stylesheet" media="all">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://localhost:1313//apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="http://localhost:1313//favicon.ico">
+<link href="" rel="alternate" type="application/rss+xml" title="@nadavc" />
+
+  <style>
+    body {
+      border-top: 5px solid #108455;
+      font-family: "Source Sans Pro";
+      font-size: 2.2em;
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: #1b74ba;
+      font-weight: 500;
+    }
+
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-1"></div>
+      <div class="col-sm-10">
+        <h2>Object Oriented Selenium
+          <h2>
+            <div style="position: relative; top: -25px">
+              <span style="font-size: 0.7em; font-style: italic">Posted on Mar 22, 2015</span>
+            </div>
+
+      </div>
+      <div class="col-sm-2">
+      </div>
+      <div class="col-sm-1"></div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-1"></div>
+      <div class="col-sm-10">
+        
+
+<p><a href="http://seleniumhq.com">Selenium</a> is an awesome browser automation framework. It saves my team a ton of work on a daily basis. Even the name is <a href="http://en.wikipedia.org/wiki/Selenium_%28software%29#History">incredibly</a> clever:</p>
+
+<blockquote>
+<p>The name Selenium comes from a joke made by Huggins in an email, mocking a competitor named Mercury, saying that you can cure mercury poisoning by taking selenium supplements. The others that received the email took the name and ran with it.</p>
+</blockquote>
+
+<p>In this post, I will present my recommendation and best practices for building clean and maintainable Selenium code, based on what I&rsquo;ve learned over the years.</p>
+
+<h2 id="tip-1-abstract-ui-using-pageobject-pattern:c6d25d9af7270ac98cf516a0c62f31bc">Tip #1 - Abstract UI using PageObject pattern</h2>
+
+<p>Every UI framework out there emphasizes separation between UI and controller layers. In Selenium, this is done using the <a href="https://code.google.com/p/selenium/wiki/PageObjects">PageObject pattern</a>. PageObject allows you to abstract away UI access from the rest of the code, resulting in clean, reusable, and most importantly - readable code. Instead of accessing divs and css, the code can focus on accessing content. Here’s what it looks like:</p>
+
+<p>Instead of this</p>
+
+<pre><code class="language-java">  driver.get(&quot;http://github.com&quot;);
+
+  // click login button
+  WebElement loginButton = driver.findElement(By.cssSelector(&quot;a[href*='login']&quot;));
+  loginButton.click();
+
+  // wait for page to load
+  By signInButtonLocator = By.cssSelector(&quot;input.btn&quot;);
+  new WebDriverWait(driver, 10).until(
+    ExpectedConditions.presenceOfElementLocated(signInButtonLocator)
+  );
+
+  // send username and password
+  driver.findElement(By.id(&quot;login_field&quot;)).sendKeys(&quot;nadavc&quot;);
+  driver.findElement(By.id(&quot;password&quot;)).sendKeys(&quot;ohrly&quot;);
+
+  // submit
+  WebElement signInButton = driver.findElement(signInButtonLocator);
+  signInButton.click();
+
+  // ..etc
+</code></pre>
+
+<p>Use this</p>
+
+<pre><code class="language-java">  new GitHubHome(driver)
+      .goToSignIn()
+      .withUsername(&quot;nadavc&quot;)
+      .withPassword(&quot;ohrly&quot;)
+      .signIn();
+</code></pre>
+
+<h2 id="tip-2-use-findby-to-remove-boilerplate:c6d25d9af7270ac98cf516a0c62f31bc">Tip #2 - Use @FindBy to remove boilerplate</h2>
+
+<p>PageObject is great for abstracting the UI, but the code is still a little verbose. Do you really need to call <code>driver.findElement()</code> for every UI element that is encapsulated by the PageObject? And what if not all elements are available during class creation?</p>
+
+<p>Enter @FindBy - members annotated with @FindBy will be wrapped by a proxy that automatically looks up the element when called. You’ll need to call <code>PageFactory.initElements()</code> to set this up.</p>
+
+<pre><code class="language-java">public class SignInPage extends SeleniumSegment {
+
+    @FindBy(id = &quot;login_field&quot;)
+    private WebElement loginField;
+
+    @FindBy(id = &quot;password&quot;)
+    private WebElement passwordField;
+
+    @FindBy(css = &quot;input[value='Sign in']&quot;)
+    private WebElement signInButton;
+
+    // ... code omitted for brevity
+}
+</code></pre>
+
+<h2 id="tip-3-split-large-pageobjects-into-smaller-objects:c6d25d9af7270ac98cf516a0c62f31bc">Tip #3 - Split large PageObjects into smaller objects</h2>
+
+<p>Even with the PageObjects pattern, large pages may result in excessive amounts of code in a single class. Some would say that this is a variation of the <a href="http://en.wikipedia.org/wiki/God_object">God Object</a> anti-pattern. To address this, my recommendation is to break large PageObjects into smaller PageObject components and embed them within the large one.</p>
+
+<h2 id="tip-4-encapsulate-repeated-blocks-into-their-own-pageobjects:c6d25d9af7270ac98cf516a0c62f31bc">Tip #4 - Encapsulate repeated blocks into their own PageObjects</h2>
+
+<p>Most webpages contain repeated blocks that can be abstracted into a single PageObject class. Makes sense when you look at the following screenshot:</p>
+
+<p><img src="/imgs/selenium-repeated-objects.png" alt="Repeated blocks" />
+</p>
+
+<p>But how do you tell Selenium to confine @FindBy to search <em>only</em> for the right <code>.repo-list-name</code>? Luckily, Selenium supports the notion of <code>context</code> - whereas you get to define the root of @FindBy’s search. The trick is to call <code>PageFactory.initElements()</code> with a custom <code>ElementLocatorFactory</code>. See <code>SearchSegment.java</code> for a more concrete example.</p>
+
+<h2 id="tip-5-use-selenium-s-wait-mechanisms-within-pageobjects:c6d25d9af7270ac98cf516a0c62f31bc">Tip #5 - Use Selenium’s Wait mechanisms within PageObjects</h2>
+
+<p>The web is asynchronous by nature, and our Selenium code needs to adapt. Always put wait code <em>within</em> PageObjects, since these states belong in UI handling code and not anywhere else. Needless to say, <code>Thread.sleep()</code> is not the solution&hellip; use Selenium’s <code>WebDriverWait</code> (or its <code>FluentWait</code> facade).</p>
+
+<h2 id="example-code:c6d25d9af7270ac98cf516a0c62f31bc">Example code</h2>
+
+<p>In an effort to group all of these tips into working code, I built a simple GitHub scraper that uses Selenium to learn about Microsoft’s favorite open source languages. The source code is available through my <a href="https://github.com/nadavc/nadavc-blog-code/tree/master/object-oriented-selenium">GitHub account</a>.</p>
+
+<p>&hellip;and yes, I&rsquo;m well aware that this could have been done using GitHub&rsquo;s <a href="https://developer.github.com/v3/repos/#list-organization-repositories">API</a> and a few curl commands :)</p>
+
+      </div>
+      <div class="col-sm-1"></div>
+    </div>
+
+    <div class="row" style="margin-top: 20px;">
+      <div class="col-sm-12" style="text-align: center"><a href="http://localhost:1313/">Back to Home</a></div>
+    </div>
+
+
+    <div class="row" style="margin-top: 20px;">
+      <div id="disqus_thread" class="col-sm-12"></div>
+    </div>
+
+
+  </div>
+  <script>
+    hljs.initHighlightingOnLoad();
+  </script>
+  <script type="text/javascript">
+     
+    var disqus_shortname = 'nadavc';
+
+     
+    (function() {
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  <script>
+    (function(i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r;
+      i[r] = i[r] || function() {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date();
+      a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0];
+      a.async = 1;
+      a.src = g;
+      m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-61219833-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+<script>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body>
+
+</html>
