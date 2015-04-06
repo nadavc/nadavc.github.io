@@ -6,8 +6,58 @@
     <description>Recent content in Posts on @nadavc</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 22 Mar 2015 00:00:00 -0700</lastBuildDate>
+    <lastBuildDate>Sun, 05 Apr 2015 01:35:42 -0700</lastBuildDate>
     <atom:link href="http://nadavc.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Why the Corporate Career Ladder is Broken</title>
+      <link>http://nadavc.com/posts/why-corporate-career-ladder-is-broken/</link>
+      <pubDate>Sun, 05 Apr 2015 01:35:42 -0700</pubDate>
+      
+      <guid>http://nadavc.com/posts/why-corporate-career-ladder-is-broken/</guid>
+      <description>
+
+&lt;p&gt;We live in exciting times. We have the &lt;a href=&#34;http://agilemanifesto.org/&#34;&gt;agile manifesto&lt;/a&gt;, &lt;a href=&#34;http://www.infoq.com/articles/what-are-self-organising-teams&#34;&gt;self-organizing&lt;/a&gt; teams, &lt;a href=&#34;http://automattic.com/&#34;&gt;fully&lt;/a&gt; &lt;a href=&#34;http://github.com&#34;&gt;distributed&lt;/a&gt; &lt;a href=&#34;http://stackoverflow.com&#34;&gt;organizations&lt;/a&gt;, Google&amp;rsquo;s 20% time, etc. We made progress. One thing, however, has not changed for at least a hundred years. The corporate ladder.&lt;/p&gt;
+
+&lt;p&gt;In this essay I hope to outline what I feel is broken with the corporate ladder and how simple reorganization can pivot us to towards the right direction.&lt;/p&gt;
+
+&lt;h2 id=&#34;what-s-the-problem-with-the-career-ladder:d36df5480ef90b35d6f8f08e1ef5a553&#34;&gt;What&amp;rsquo;s the problem with the career ladder?&lt;/h2&gt;
+
+&lt;p&gt;From Wikipedia:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Career ladder is a metaphor for job promotion. In business and human resources management, the ladder typically describes the progression from entry level positions to higher levels of pay, skill, responsibility, or authority. This metaphor is spatially oriented, and frequently used to denote upward mobility within a stratified promotion model. Because the ladder does not provide for lateral movement, it is assumed to be a singular track with the greatest benefits at the top.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The career ladder is a narrow path that assumes our goal is to reach the top. Oftentimes, one&amp;rsquo;s degree of success is directly proportional to the number of people that person manages . Those of us who do not necessary aspire to reach this definition of &lt;em&gt;top&lt;/em&gt;, have no option but to remain somewhere in the middle and wonder if we&amp;rsquo;ve reached the peak of our ability to contribute. This hidden assumption, where everyone can contribute more if they managed more people, is where the corporate ladder fundamentally breaks.&lt;/p&gt;
+
+&lt;h2 id=&#34;shouldn-t-we-consider-people-management-a-career-advancement:d36df5480ef90b35d6f8f08e1ef5a553&#34;&gt;Shouldn&amp;rsquo;t we consider people management a career advancement?&lt;/h2&gt;
+
+&lt;p&gt;While there is no denying that those recognized as high performing individuals are often the ones who are promoted to management, there are two innate problems that remain.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;The step you reached isn&amp;rsquo;t necessarily the best for you&lt;/strong&gt;. The &lt;a href=&#34;http://en.wikipedia.org/wiki/Peter_Principle&#34;&gt;Peter Principle&lt;/a&gt; is a concept in management theory that claims promotions are a result of performance in the previous role rather than expected performance in the intended role. Consequently, a promotion might in fact place highly performing individuals in less than adequate positions and cause them to contribute significantly less than their potential. One could argue that organizations are smart enough to realize this and revert their decisions. They&amp;rsquo;re not.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Individuals who aren&amp;rsquo;t promoted are more likely to leave&lt;/strong&gt;. Those who aren&amp;rsquo;t promoted to management aren&amp;rsquo;t necessarily performing poorly. It is the lack of management positions that create the illusion that they are, where in fact, in other organizations, they might have been picked for management. This, in turn, pushes high performing individuals to look for work elsewhere, only because they were unfortunate enough to be with better performing individuals.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;wait-we-now-have-technical-career-paths-and-lateral-moves:d36df5480ef90b35d6f8f08e1ef5a553&#34;&gt;Wait! We now have technical career paths and lateral moves!&lt;/h2&gt;
+
+&lt;p&gt;True, but my position on this is that it is in fact more harmful to organizations. We rarely work as individuals anymore, and &lt;a href=&#34;http://www.goodreads.com/quotes/20103-the-whole-is-greater-than-the-sum-of-its-parts&#34;&gt;someone&lt;/a&gt; much smarter than I once said that &amp;ldquo;the whole is greater than the sum of its parts.&amp;rdquo; What happens when you take a key player and promote her to a new team? The old team takes a hit&amp;hellip; and usually a very significant one. Why would organizations want to encourage this? Why pry the best players out of where they usually play a very significant role? Furthermore, when individuals eyeball these sort of promotions, they begin to think about their ability to shine instead of make the team shine as a whole. This, too, is detrimental to the success of organizations, and should be avoided wherever possible.&lt;/p&gt;
+
+&lt;h2 id=&#34;what-should-we-do:d36df5480ef90b35d6f8f08e1ef5a553&#34;&gt;What should we do?&lt;/h2&gt;
+
+&lt;p&gt;In &lt;a href=&#34;http://www.amazon.com/Reinventing-Organizations-Frederic-Laloux/dp/2960133501&#34;&gt;Reinventing Organizations&lt;/a&gt;, Frederic Laloux discusses how it was previously acceptable to assume all innovation and direction needed to come from the top of the pyramid. In today&amp;rsquo;s information age, we know the opposite is true. Every individual has infinite access to information and ideas, and that teamwork is of utmost importance. How do we go about doing this, yet still make sure people have clear goals in mind?&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Focus on business goals.&lt;/strong&gt; Measure teams by business goals. The team&amp;rsquo;s only goal should be to deliver business results. Individuals progress by helping the team succeed, not the other way around.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Celebrate team success by compensating equally.&lt;/strong&gt; Remove personal agendas by compensating everyone on the team equally and openly. Number of subordinates or titles should not matter.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Iterate and improve religiously.&lt;/strong&gt; Continuously aspire to improve based on clear business metrics. Be mindful of when further optimizations can be made, even at the cost of letting team members go. &lt;a href=&#34;http://www.slideshare.net/reed2001/culture-1798664&#34;&gt;Netflix&lt;/a&gt; does this very well.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Do not promote within the organization.&lt;/strong&gt; Finally, remove the temptation to shine because there is a new challenge on the horizon. Ensure individuals are 100% committed to the work at hand.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;With these goals in mind, I firmly believe that teams will iterate until they reach perfection, which is the nirvana all businesses want to achieve.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Object Oriented Selenium</title>
