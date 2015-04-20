@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>
+  IntelliJ Gem: Structural Search
+</title>
+<link rel="stylesheet" href="http://nadavc.com//css/reset.css">
+<script src="http://nadavc.com//js/highlight.pack.js"></script>
+<link rel="stylesheet" href="http://nadavc.com//css/github.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,700,300italic,700italic" rel="stylesheet" type="text/css">
+<link href="http://nadavc.com//css/hover.css" rel="stylesheet" media="all">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://nadavc.com//apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="http://nadavc.com//favicon.ico">
+<link href="" rel="alternate" type="application/rss+xml" title="@nadavc" />
+<link rel="stylesheet" href="http://nadavc.com//css/layout.css">
+
+  <style>
+    body {
+      border-top: 5px solid #108455;
+      font-family: "Source Sans Pro";
+      font-size: 2.2em;
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: #1b74ba;
+      font-weight: 500;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-1"></div>
+      <div class="col-sm-10">
+        <h2>IntelliJ Gem: Structural Search
+          <h2>
+            <div style="position: relative; top: -25px">
+              <span style="font-size: 0.7em; font-style: italic">Posted on Apr 19, 2015</span>
+            </div>
+
+      </div>
+      <div class="col-sm-2">
+      </div>
+      <div class="col-sm-1"></div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-1"></div>
+      <div class="col-sm-10">
+        
+
+<p>As an engineer, I&rsquo;ve always been obsessed with productivity and efficiency. I frequently experiment with new tools and methodologies and try to find what works best for me. The IDE is no exception&hellip; and out of everything that&rsquo;s out there, IntelliJ is hard to beat.</p>
+
+<p>One of the hidden (and <a href="https://www.jetbrains.com/idea/help/structural-search-and-replace.html">hardly</a> documented) gems in IntelliJ is the structured search. In a sentence, it allows you to leverage IntelliJ&rsquo;s understanding of code to perform complex search and replace scenarios. There are lots of cool usages for this - although the real power hides under the <code>Script constraints</code> section.</p>
+
+<h2 id="finding-usages-in-annotated-classes:ae733365846f59b8f5ad0f21c7c9d46c">Finding usages in annotated classes</h2>
+
+<p>Some might say that the controller layer should not access the data layer directly. How would you search for these instances? Structured search makes it easy. In this example, we&rsquo;re searching for all classes that are annotated with <code>@Controller</code> and have a private member that is (<em>or inherits from</em>) a type that contains &ldquo;Repo&rdquo;:</p>
+
+<p><img src="/imgs/ss1_code.png" alt="ss1 code" />
+</p>
+
+<p><img src="/imgs/ss1_annotation.png" alt="ss1 annotation" />
+</p>
+
+<p><img src="/imgs/ss1_type.png" alt="ss1 type" />
+</p>
+
+<h2 id="finding-candidates-for-god-objects:ae733365846f59b8f5ad0f21c7c9d46c">Finding candidates for God objects</h2>
+
+<p>Every legacy code ends up suffering from the <code>God object</code> code smell. Classes with a large number of methods are very likely to fall into this category. Here&rsquo;s how it&rsquo;s done with structural search.</p>
+
+<p><img src="/imgs/ss2_code.png" alt="ss2 code" />
+</p>
+
+<p><img src="/imgs/ss2_methodname.png" alt="ss2 code" />
+</p>
+
+<h2 id="finding-inefficient-log-statements:ae733365846f59b8f5ad0f21c7c9d46c">Finding inefficient log statements</h2>
+
+<p>SLF4J recommends we use <a href="http://www.slf4j.org/faq.html#logging_performance">parameterized</a> log entries to improve efficiency. How do we find log entries that use concatenation? Enter <code>Script constraints</code>:</p>
+
+<p><img src="/imgs/ss3_code.png" alt="ss3 code" />
+</p>
+
+<p><img src="/imgs/ss3_logger.png" alt="ss3 logger" />
+</p>
+
+<p><img src="/imgs/ss3_call.png" alt="ss3 call" />
+</p>
+
+<p><img src="/imgs/ss3_firstparam_top.png" alt="ss3 params1" />
+</p>
+
+<p><img src="/imgs/ss3_firstparam_bottom.png" alt="ss3 params2" />
+</p>
+
+<h2 id="wait-what:ae733365846f59b8f5ad0f21c7c9d46c">Wait&hellip; what?</h2>
+
+<p>IntelliJ&rsquo;s help states the following:</p>
+
+<blockquote>
+<p>Script constraints are used when items to search for are more than a plain match. If you are looking for certain language constructs (for example, constructors with the specified number of parameters, or members with the specified visibility modifiers), apply constraints described as Groovy scripts.</p>
+</blockquote>
+
+<p>Granted, this leaves something to be desired. In essence, when <code>Script constraints</code> is enabled, IntelliJ executes the Groovy script against the variable that was found (in this case, <code>$FirstParam$</code>). If the script evaluates to <a href="http://www.groovy-lang.org/semantics.html#Groovy-Truth">true</a>, the condition is met. As you might have guessed, the expression is passed to the Groovy code as <code>__context__</code>.</p>
+
+<p>The type of <code>__context__</code> depends on the variable in question, although it will always be one of IntelliJ&rsquo;s internal <code>Program Structure Interface (PSI)</code> types. For me, the easiest way to find this out was to output the class name to a file while evaluating the Groovy script:</p>
+
+<pre><code class="language-groovy">new File(&quot;/Users/user/filetype.txt&quot;).append(__context__.class.canonicalName)
+
+</code></pre>
+
+<p>Finally, going back to our example, in order to find non-parameterized log statements, we are looking for statements that include a non-literal expression. Anything other than a literal expression (effectively a regular string) would be considered inefficient, as it would force string concatenation for all log statements.</p>
+
+<p>Here are some links for more information about the different types of PsiExpressions:</p>
+
+<ul>
+<li><a href="https://confluence.jetbrains.com/display/IDEADEV/PSI+Cookbook">PSI Cookbook</a></li>
+<li><a href="https://www.jetbrains.com/idea/help/viewing-psi-structure.html">Viewing PSI Structure</a></li>
+<li><a href="https://github.com/JetBrains/intellij-community">IntelliJ source code</a></li>
+</ul>
+
+      </div>
+      <div class="col-sm-1"></div>
+    </div>
+
+    <div class="row" style="margin-top: 20px;">
+      <div class="col-sm-12" style="text-align: center"><a href="/">Back to Home</a></div>
+    </div>
+
+
+    <div class="row" style="margin-top: 20px;">
+      <div id="disqus_thread" class="col-sm-12"></div>
+    </div>
+
+
+  </div>
+  <script>
+    hljs.initHighlightingOnLoad();
+  </script>
+  <script type="text/javascript">
+     
+    var disqus_shortname = 'nadavc';
+
+     
+    (function() {
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  <script>
+    (function(i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r;
+      i[r] = i[r] || function() {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date();
+      a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0];
+      a.async = 1;
+      a.src = g;
+      m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-61219833-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+</body>
+
+</html>

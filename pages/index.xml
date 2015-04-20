@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pages on @nadavc</title>
+    <link>http://localhost:1313/pages/</link>
+    <description>Recent content in Pages on @nadavc</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 27 Mar 2015 22:13:01 -0700</lastBuildDate>
+    <atom:link href="http://localhost:1313/pages/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Books</title>
+      <link>http://localhost:1313/pages/books/</link>
+      <pubDate>Fri, 27 Mar 2015 22:13:01 -0700</pubDate>
+      
+      <guid>http://localhost:1313/pages/books/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

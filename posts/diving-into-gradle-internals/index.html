@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>
+  Diving Into Gradle Internals
+</title>
+<link rel="stylesheet" href="http://localhost:1313//css/reset.css">
+<script src="http://localhost:1313//js/highlight.pack.js"></script>
+<link rel="stylesheet" href="http://localhost:1313//css/github.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,700,300italic,700italic" rel="stylesheet" type="text/css">
+<link href="http://localhost:1313//css/hover.css" rel="stylesheet" media="all">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://localhost:1313//apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="http://localhost:1313//favicon.ico">
+<link href="" rel="alternate" type="application/rss+xml" title="@nadavc" />
+<link rel="stylesheet" href="http://localhost:1313//css/layout.css">
+
+  <style>
+    body {
+      border-top: 5px solid #108455;
+      font-family: "Source Sans Pro";
+      font-size: 2.2em;
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: #1b74ba;
+      font-weight: 500;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-1"></div>
+      <div class="col-sm-10">
+        <h2>Diving Into Gradle Internals
+          <h2>
+            <div style="position: relative; top: -25px">
+              <span style="font-size: 0.7em; font-style: italic">Posted on Apr 4, 2015</span>
+            </div>
+
+      </div>
+      <div class="col-sm-2">
+      </div>
+      <div class="col-sm-1"></div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-1"></div>
+      <div class="col-sm-10">
+        
+
+<h1 id="this-is-still-a-draft-i-can-t-get-my-head-around-how-gradle-compiles-and-evaluates-the-files-yet-need-to-underestand-asm-and-ast-transformations-better:52b556ddb9535fc94ec74c73277eb95b">THIS IS STILL A DRAFT. I CAN&rsquo;T GET MY HEAD AROUND HOW GRADLE COMPILES AND EVALUATES THE FILES YET. NEED TO UNDERESTAND ASM AND AST TRANSFORMATIONS BETTER</h1>
+
+<p>I&rsquo;ve always been a big fan of Gradle, but I&rsquo;ve only recently realized that some of the <a href="http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html">DSL</a> magic doesn&rsquo;t quite map to my understanding of Groovy delegates. This weekend I decided to put an end to this mystery and really see how Gradle works from the inside out.</p>
+
+<p>Here&rsquo;s an innocent looking <code>build.gradle</code> file that I&rsquo;ve used:</p>
+
+<pre><code class="language-groovy">apply plugin: 'java'
+
+version = '1.0'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.11'
+}
+
+task hello(type: GreeterTask) {
+    greeting = 'hola'
+}
+
+class GreeterTask extends DefaultTask {
+
+    String greeting = 'hello'
+
+    @TaskAction
+    def greet() {
+        println &quot;$greeting to you!&quot;
+    }
+
+}
+</code></pre>
+
+<h2 id="debugging-gradle-builds-using-gradle-source-code:52b556ddb9535fc94ec74c73277eb95b">Debugging Gradle builds using Gradle source code</h2>
+
+<p>First, I needed to figure out how to step into Gradle code. After some digging, it turned out to be pretty simple:</p>
+
+<ol>
+<li>Git clone Gradle code from <a href="https://github.com/gradle/gradle">GitHub</a></li>
+<li>Run <code>$ ./gradlew idea</code> to generate the IDEA project files</li>
+<li>Open the <code>.ipr</code> file in IDEA (you do have IntelliJ IDEA, right?)</li>
+<li>Create a new application run configuration and point to the <code>org.gradle.debug.GradleBuildRunner</code> class. It&rsquo;s a helper class that allows you to run Gradle as if you run it from the commandline.</li>
+<li>Alter the params in <code>GradleBuildRunner</code> to point to your <code>build.gradle</code> file</li>
+</ol>
+
+<p>As a side note, the Gradle source code is a <em>great</em> example of how to use the build file to generate a consistent environment for the development team. Check out <a href="https://github.com/gradle/gradle/blob/master/gradle/idea.gradle">idea.gradle</a> for more details.</p>
+
+<h2 id="stepping-through-the-build-phases:52b556ddb9535fc94ec74c73277eb95b">Stepping through the build phases</h2>
+
+<p>As you might imagine, the call chain on even a simple Gradle build can become quite complex. I&rsquo;ve found that Gradle developers are very fond of the <a href="http://en.wikipedia.org/wiki/Decorator_pattern">Decorator pattern</a>, which kind of reminds me of Morpheus when he dared Neo to find out &ldquo;how deep the rabbit hole goes&rdquo;. Here&rsquo;s the breakdown by logical steps:</p>
+
+<ol>
+<li>Initialization of the decorator chain for exception handling, logging, validation, and build actions</li>
+<li>Gradle parameters are parsed and Gradle decides whether to display help, pop up the <a href="https://gradle.org/docs/current/userguide/tutorial_gradle_gui.html">GUI</a> or launch a build (in-process or via the daemon). When a build is ran, a <code>RunBuildAction</code> is triggered.</li>
+<li>We reach <code>DefaultGradleLauncher#doBuildStages()</code>, which is where the various build files are loaded, configured, and executed. This is <em>by far</em> the most complicated part of the code. This is where
+
+<ol>
+<li>Init scripts are evaluated</li>
+<li>Settings script is evaluated against a <code>DefaultSettings</code> instance</li>
+<li>Build scripts (projects) are loaded as <code>DefaultProject</code> and configured</li>
+<li>Task graph is built and executed</li>
+</ol></li>
+</ol>
+
+<h2 id="build-stages:52b556ddb9535fc94ec74c73277eb95b">Build Stages</h2>
+
+<h2 id="open-questions:52b556ddb9535fc94ec74c73277eb95b">Open questions</h2>
+
+<ul>
+<li>Stepping through the build phases</li>
+<li>How does <code>apply plugin</code> and <code>version</code> work? - I&rsquo;m assuming DefaultProject is simply the delegate when the build.gradle script is ran.</li>
+<li>How do build blocks such as <code>repositories</code> and <code>dependencies</code> work? - these work through decoration. Need to understand ASM better to see how this works. Somehow delegates to DependencyHandler.</li>
+<li>How does <code>task name(type: Type)</code> work? - This goes through a TaskDefinitionScriptTransformer that hooks up to the CompilationUnit. Very deep in AST transformations in Groovy.</li>
+<li>How do plugins get added to Gradle build? - They&rsquo;re addressed in the first compilation/evaluation phase of <code>DefaultScriptPluginFactory()</code>`</li>
+</ul>
+
+      </div>
+      <div class="col-sm-1"></div>
+    </div>
+
+    <div class="row" style="margin-top: 20px;">
+      <div class="col-sm-12" style="text-align: center"><a href="/">Back to Home</a></div>
+    </div>
+
+
+    <div class="row" style="margin-top: 20px;">
+      <div id="disqus_thread" class="col-sm-12"></div>
+    </div>
+
+
+  </div>
+  <script>
+    hljs.initHighlightingOnLoad();
+  </script>
+  <script type="text/javascript">
+     
+    var disqus_shortname = 'nadavc';
+
+     
+    (function() {
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  <script>
+    (function(i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r;
+      i[r] = i[r] || function() {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date();
+      a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0];
+      a.async = 1;
+      a.src = g;
+      m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-61219833-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+<script>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body>
+
+</html>
