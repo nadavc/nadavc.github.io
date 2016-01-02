@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>
+  Spring Boot and Kotlin
+</title>
+<link rel="stylesheet" href="http://nadavc.github.io//css/reset.css">
+<script src="http://nadavc.github.io//js/highlight.pack.js"></script>
+<link rel="stylesheet" href="http://nadavc.github.io//css/github.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,700,300italic,700italic" rel="stylesheet" type="text/css">
+<link href="http://nadavc.github.io//css/hover.css" rel="stylesheet" media="all">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://nadavc.github.io//apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="http://nadavc.github.io//favicon.ico">
+<link href="" rel="alternate" type="application/rss+xml" title="@nadavc" />
+<link rel="stylesheet" href="http://nadavc.github.io//css/layout.css">
+
+  <style>
+    body {
+      border-top: 5px solid #108455;
+      font-family: "Source Sans Pro";
+      font-size: 2.2em;
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: #1b74ba;
+      font-weight: 500;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-1"></div>
+      <div class="col-sm-10">
+        <h2>Spring Boot and Kotlin
+          <h2>
+            <div style="position: relative; top: -25px">
+              <span style="font-size: 0.7em; font-style: italic">Posted on Jan 1, 2016</span>
+            </div>
+
+      </div>
+      <div class="col-sm-2">
+      </div>
+      <div class="col-sm-1"></div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-1"></div>
+      <div class="col-sm-10">
+        
+
+<p>I&rsquo;ve recently had the pleasure of trying out <a href="http://kotlinlang.org">Kotlin</a> for a few projects at work. It&rsquo;s a promising JVM language from <a href="http://jetbrains.com">JetBrains</a> that includes a lot of functional elements and a strong type system. I&rsquo;m told it&rsquo;s a combination of the best features of <a href="http://www.scala-lang.org/">Scala</a> and <a href="http://www.groovy-lang.org/">Groovy</a>.</p>
+
+<h3 id="does-it-work-with-spring:d2a0417b488b2041721a2c3b69efd68e">Does it work with Spring?</h3>
+
+<p>JetBrains promises 100% interoperability with Java, but it&rsquo;s not immediately obvious how to get all the pieces working together. In this post I will outline some gotchas when building a Spring Boot &ldquo;Hello World&rdquo;. For the impatient, there&rsquo;s a fully working example at the end.</p>
+
+<h3 id="running-bootrun-from-gradle:d2a0417b488b2041721a2c3b69efd68e">Running bootRun from Gradle</h3>
+
+<p>The <code>bootRun</code> task requires a <code>public static void main(String[] args)</code> method on the <code>@SpringBootApplication</code> annotated class. Kotlin does not have static class methods, but <a href="https://kotlinlang.org/docs/reference/object-declarations.html#companion-objects">companion objects</a> work just as well:</p>
+
+<pre><code class="language-java">@SpringBootApplication
+open class App {
+
+    companion object {
+        @JvmStatic
+        fun main(args: Array&lt;String&gt;) {
+            SpringApplication.run(App::class.java, *args)
+        }
+    }
+
+}
+</code></pre>
+
+<p>Note that the class must also be marked <code>open</code> and include the <code>@JvmStatic</code> annotation on the companion object.</p>
+
+<h3 id="dependency-injection-autowiring:d2a0417b488b2041721a2c3b69efd68e">Dependency Injection (autowiring)</h3>
+
+<p>Generally speaking, dependency injection can be done via fields, constructor, and setters.</p>
+
+<p>Field injection is relatively straightforward. The one caveat is to use the <code>lateinit</code> keyword, as Kotlin does not allow late initialization by default.</p>
+
+<pre><code class="language-java">class SampleController {
+   @Autowired
+   lateinit var sampleService: SampleService
+ }
+</code></pre>
+
+<p>Constructor-based injection is done via Kotlin&rsquo;s primary constructors. Note the addition of <code>constructor</code> in the class header:</p>
+
+<pre><code class="language-java">class SampleController @Autowired constructor(val sampleService: SampleService) {
+}
+</code></pre>
+
+<p>Setter-based injection can be done, but I wasn&rsquo;t able to make it work with custom setters, which makes it a little useless anyway. Here&rsquo;s the Kotlin syntax:</p>
+
+<pre><code class="language-java">class SampleController {
+    lateinit var sampleService: SampleService
+       @Autowired set
+}
+</code></pre>
+
+<h3 id="logger-initialization:d2a0417b488b2041721a2c3b69efd68e">Logger initialization</h3>
+
+<p>Logger initialization (such as SLF4J) is usually done with <code>LoggerFactory#getLogger(Class&lt;?&gt; clazz)</code>. To get the Java class for your Kotlin class, you&rsquo;d need to use <code>::class.java</code>:</p>
+
+<pre><code class="language-java">val logger = LoggerFactory.getLogger(SampleController::class.java)
+</code></pre>
+
+<h3 id="jackson-deserialization:d2a0417b488b2041721a2c3b69efd68e">Jackson deserialization</h3>
+
+<p>Spring Boot uses Jackson to serialize and deserialize Java objects into Json and back. Serialization works as expected, but in order to get deserialization to work, you&rsquo;d need to include the <a href="https://github.com/FasterXML/jackson-module-kotlin">Jackson Kotlin Module</a>. In addition to adding its dependencies in <code>build.gradle</code>, you would also need to add the <code>KotlinModule</code> as a <code>@Bean</code>:</p>
+
+<pre><code class="language-java">@SpringBootApplication
+open class App {
+
+  @Bean
+  open fun kotlinModule() = KotlinModule()
+
+}
+</code></pre>
+
+<h3 id="all-together-now:d2a0417b488b2041721a2c3b69efd68e">All together now</h3>
+
+<p>To see everything working together, please check out the example on GitHub at <a href="https://github.com/nadavc/nadavc-blog-code/tree/master/kotlin-boot">https://github.com/nadavc/nadavc-blog-code/tree/master/kotlin-boot</a></p>
+
+<h3 id="great-kotlin-resources:d2a0417b488b2041721a2c3b69efd68e">Great Kotlin resources</h3>
+
+<ul>
+<li><a href="http://try.kotlinlang.org/#/Kotlin%20Koans">Kotlin Koans</a></li>
+<li><a href="https://www.youtube.com/watch?v=AhA-Q7MOre0">Functional Kotlin</a></li>
+<li><a href="https://kotlinlang.org/docs/reference/">Kotlin Reference</a></li>
+</ul>
+
+      </div>
+      <div class="col-sm-1"></div>
+    </div>
+
+    <div class="row" style="margin-top: 20px;">
+      <div class="col-sm-12" style="text-align: center"><a href="/">Back to Home</a></div>
+    </div>
+
+
+    <div class="row" style="margin-top: 20px;">
+      <div id="disqus_thread" class="col-sm-12"></div>
+    </div>
+
+
+  </div>
+  <script>
+    hljs.initHighlightingOnLoad();
+  </script>
+  <script type="text/javascript">
+     
+    var disqus_shortname = 'nadavc';
+
+     
+    (function() {
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  <script>
+    (function(i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r;
+      i[r] = i[r] || function() {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date();
+      a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0];
+      a.async = 1;
+      a.src = g;
+      m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-61219833-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+</body>
+
+</html>

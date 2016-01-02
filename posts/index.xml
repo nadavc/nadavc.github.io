@@ -2,19 +2,112 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on @nadavc</title>
-    <link>http://nadavc.com/posts/</link>
+    <link>http://nadavc.github.io/posts/</link>
     <description>Recent content in Posts on @nadavc</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 19 Apr 2015 00:44:37 -0700</lastBuildDate>
-    <atom:link href="http://nadavc.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 01 Jan 2016 00:00:00 -0800</lastBuildDate>
+    <atom:link href="http://nadavc.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Spring Boot and Kotlin</title>
+      <link>http://nadavc.github.io/posts/spring-boot-and-kotlin/</link>
+      <pubDate>Fri, 01 Jan 2016 00:00:00 -0800</pubDate>
+      
+      <guid>http://nadavc.github.io/posts/spring-boot-and-kotlin/</guid>
+      <description>
+
+&lt;p&gt;I&amp;rsquo;ve recently had the pleasure of trying out &lt;a href=&#34;http://kotlinlang.org&#34;&gt;Kotlin&lt;/a&gt; for a few projects at work. It&amp;rsquo;s a promising JVM language from &lt;a href=&#34;http://jetbrains.com&#34;&gt;JetBrains&lt;/a&gt; that includes a lot of functional elements and a strong type system. I&amp;rsquo;m told it&amp;rsquo;s a combination of the best features of &lt;a href=&#34;http://www.scala-lang.org/&#34;&gt;Scala&lt;/a&gt; and &lt;a href=&#34;http://www.groovy-lang.org/&#34;&gt;Groovy&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;does-it-work-with-spring:d2a0417b488b2041721a2c3b69efd68e&#34;&gt;Does it work with Spring?&lt;/h3&gt;
+
+&lt;p&gt;JetBrains promises 100% interoperability with Java, but it&amp;rsquo;s not immediately obvious how to get all the pieces working together. In this post I will outline some gotchas when building a Spring Boot &amp;ldquo;Hello World&amp;rdquo;. For the impatient, there&amp;rsquo;s a fully working example at the end.&lt;/p&gt;
+
+&lt;h3 id=&#34;running-bootrun-from-gradle:d2a0417b488b2041721a2c3b69efd68e&#34;&gt;Running bootRun from Gradle&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;bootRun&lt;/code&gt; task requires a &lt;code&gt;public static void main(String[] args)&lt;/code&gt; method on the &lt;code&gt;@SpringBootApplication&lt;/code&gt; annotated class. Kotlin does not have static class methods, but &lt;a href=&#34;https://kotlinlang.org/docs/reference/object-declarations.html#companion-objects&#34;&gt;companion objects&lt;/a&gt; work just as well:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;@SpringBootApplication
+open class App {
+
+    companion object {
+        @JvmStatic
+        fun main(args: Array&amp;lt;String&amp;gt;) {
+            SpringApplication.run(App::class.java, *args)
+        }
+    }
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that the class must also be marked &lt;code&gt;open&lt;/code&gt; and include the &lt;code&gt;@JvmStatic&lt;/code&gt; annotation on the companion object.&lt;/p&gt;
+
+&lt;h3 id=&#34;dependency-injection-autowiring:d2a0417b488b2041721a2c3b69efd68e&#34;&gt;Dependency Injection (autowiring)&lt;/h3&gt;
+
+&lt;p&gt;Generally speaking, dependency injection can be done via fields, constructor, and setters.&lt;/p&gt;
+
+&lt;p&gt;Field injection is relatively straightforward. The one caveat is to use the &lt;code&gt;lateinit&lt;/code&gt; keyword, as Kotlin does not allow late initialization by default.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;class SampleController {
+   @Autowired
+   lateinit var sampleService: SampleService
+ }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Constructor-based injection is done via Kotlin&amp;rsquo;s primary constructors. Note the addition of &lt;code&gt;constructor&lt;/code&gt; in the class header:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;class SampleController @Autowired constructor(val sampleService: SampleService) {
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Setter-based injection can be done, but I wasn&amp;rsquo;t able to make it work with custom setters, which makes it a little useless anyway. Here&amp;rsquo;s the Kotlin syntax:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;class SampleController {
+    lateinit var sampleService: SampleService
+       @Autowired set
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;logger-initialization:d2a0417b488b2041721a2c3b69efd68e&#34;&gt;Logger initialization&lt;/h3&gt;
+
+&lt;p&gt;Logger initialization (such as SLF4J) is usually done with &lt;code&gt;LoggerFactory#getLogger(Class&amp;lt;?&amp;gt; clazz)&lt;/code&gt;. To get the Java class for your Kotlin class, you&amp;rsquo;d need to use &lt;code&gt;::class.java&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;val logger = LoggerFactory.getLogger(SampleController::class.java)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;jackson-deserialization:d2a0417b488b2041721a2c3b69efd68e&#34;&gt;Jackson deserialization&lt;/h3&gt;
+
+&lt;p&gt;Spring Boot uses Jackson to serialize and deserialize Java objects into Json and back. Serialization works as expected, but in order to get deserialization to work, you&amp;rsquo;d need to include the &lt;a href=&#34;https://github.com/FasterXML/jackson-module-kotlin&#34;&gt;Jackson Kotlin Module&lt;/a&gt;. In addition to adding its dependencies in &lt;code&gt;build.gradle&lt;/code&gt;, you would also need to add the &lt;code&gt;KotlinModule&lt;/code&gt; as a &lt;code&gt;@Bean&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;@SpringBootApplication
+open class App {
+
+  @Bean
+  open fun kotlinModule() = KotlinModule()
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;all-together-now:d2a0417b488b2041721a2c3b69efd68e&#34;&gt;All together now&lt;/h3&gt;
+
+&lt;p&gt;To see everything working together, please check out the example on GitHub at &lt;a href=&#34;https://github.com/nadavc/nadavc-blog-code/tree/master/kotlin-boot&#34;&gt;https://github.com/nadavc/nadavc-blog-code/tree/master/kotlin-boot&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;great-kotlin-resources:d2a0417b488b2041721a2c3b69efd68e&#34;&gt;Great Kotlin resources&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://try.kotlinlang.org/#/Kotlin%20Koans&#34;&gt;Kotlin Koans&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=AhA-Q7MOre0&#34;&gt;Functional Kotlin&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://kotlinlang.org/docs/reference/&#34;&gt;Kotlin Reference&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
     
     <item>
       <title>IntelliJ Gem: Structural Search</title>
-      <link>http://nadavc.com/posts/structural-search-in-intellij/</link>
+      <link>http://nadavc.github.io/posts/structural-search-in-intellij/</link>
       <pubDate>Sun, 19 Apr 2015 00:44:37 -0700</pubDate>
       
-      <guid>http://nadavc.com/posts/structural-search-in-intellij/</guid>
+      <guid>http://nadavc.github.io/posts/structural-search-in-intellij/</guid>
       <description>
 
 &lt;p&gt;As an engineer, I&amp;rsquo;ve always been obsessed with productivity and efficiency. I frequently experiment with new tools and methodologies and try to find what works best for me. The IDE is no exception&amp;hellip; and out of everything that&amp;rsquo;s out there, IntelliJ is hard to beat.&lt;/p&gt;
@@ -25,43 +118,33 @@
 
 &lt;p&gt;Some might say that the controller layer should not access the data layer directly. How would you search for these instances? Structured search makes it easy. In this example, we&amp;rsquo;re searching for all classes that are annotated with &lt;code&gt;@Controller&lt;/code&gt; and have a private member that is (&lt;em&gt;or inherits from&lt;/em&gt;) a type that contains &amp;ldquo;Repo&amp;rdquo;:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/ss1_code.png&#34; alt=&#34;ss1 code&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/ss1_code.png&#34; alt=&#34;ss1 code&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/ss1_annotation.png&#34; alt=&#34;ss1 annotation&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/ss1_annotation.png&#34; alt=&#34;ss1 annotation&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/ss1_type.png&#34; alt=&#34;ss1 type&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/ss1_type.png&#34; alt=&#34;ss1 type&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;finding-candidates-for-god-objects:ae733365846f59b8f5ad0f21c7c9d46c&#34;&gt;Finding candidates for God objects&lt;/h2&gt;
 
 &lt;p&gt;Every legacy code ends up suffering from the &lt;code&gt;God object&lt;/code&gt; code smell. Classes with a large number of methods are very likely to fall into this category. Here&amp;rsquo;s how it&amp;rsquo;s done with structural search.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/ss2_code.png&#34; alt=&#34;ss2 code&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/ss2_code.png&#34; alt=&#34;ss2 code&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/ss2_methodname.png&#34; alt=&#34;ss2 code&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/ss2_methodname.png&#34; alt=&#34;ss2 code&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;finding-inefficient-log-statements:ae733365846f59b8f5ad0f21c7c9d46c&#34;&gt;Finding inefficient log statements&lt;/h2&gt;
 
 &lt;p&gt;SLF4J recommends we use &lt;a href=&#34;http://www.slf4j.org/faq.html#logging_performance&#34;&gt;parameterized&lt;/a&gt; log entries to improve efficiency. How do we find log entries that use concatenation? Enter &lt;code&gt;Script constraints&lt;/code&gt;:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/ss3_code.png&#34; alt=&#34;ss3 code&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/ss3_code.png&#34; alt=&#34;ss3 code&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/ss3_logger.png&#34; alt=&#34;ss3 logger&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/ss3_logger.png&#34; alt=&#34;ss3 logger&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/ss3_call.png&#34; alt=&#34;ss3 call&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/ss3_call.png&#34; alt=&#34;ss3 call&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/ss3_firstparam_top.png&#34; alt=&#34;ss3 params1&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/ss3_firstparam_top.png&#34; alt=&#34;ss3 params1&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/ss3_firstparam_bottom.png&#34; alt=&#34;ss3 params2&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/ss3_firstparam_bottom.png&#34; alt=&#34;ss3 params2&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;wait-what:ae733365846f59b8f5ad0f21c7c9d46c&#34;&gt;Wait&amp;hellip; what?&lt;/h2&gt;
 
@@ -93,10 +176,10 @@
     
     <item>
       <title>Why the Corporate Career Ladder is Broken</title>
-      <link>http://nadavc.com/posts/why-corporate-career-ladder-is-broken/</link>
+      <link>http://nadavc.github.io/posts/why-corporate-career-ladder-is-broken/</link>
       <pubDate>Sun, 05 Apr 2015 01:35:42 -0700</pubDate>
       
-      <guid>http://nadavc.com/posts/why-corporate-career-ladder-is-broken/</guid>
+      <guid>http://nadavc.github.io/posts/why-corporate-career-ladder-is-broken/</guid>
       <description>
 
 &lt;p&gt;We live in exciting times. We have the &lt;a href=&#34;http://agilemanifesto.org/&#34;&gt;agile manifesto&lt;/a&gt;, &lt;a href=&#34;http://www.infoq.com/articles/what-are-self-organising-teams&#34;&gt;self-organizing&lt;/a&gt; teams, &lt;a href=&#34;http://automattic.com/&#34;&gt;fully&lt;/a&gt; &lt;a href=&#34;http://github.com&#34;&gt;distributed&lt;/a&gt; &lt;a href=&#34;http://stackoverflow.com&#34;&gt;organizations&lt;/a&gt;, Google&amp;rsquo;s 20% time, etc. We made progress. One thing, however, has not changed for at least a hundred years. The corporate ladder.&lt;/p&gt;
@@ -143,10 +226,10 @@
     
     <item>
       <title>Object Oriented Selenium</title>
-      <link>http://nadavc.com/posts/object-oriented-selenium/</link>
+      <link>http://nadavc.github.io/posts/object-oriented-selenium/</link>
       <pubDate>Sun, 22 Mar 2015 00:00:00 -0700</pubDate>
       
-      <guid>http://nadavc.com/posts/object-oriented-selenium/</guid>
+      <guid>http://nadavc.github.io/posts/object-oriented-selenium/</guid>
       <description>
 
 &lt;p&gt;&lt;a href=&#34;http://seleniumhq.com&#34;&gt;Selenium&lt;/a&gt; is an awesome browser automation framework. It saves my team a ton of work on a daily basis. Even the name is &lt;a href=&#34;http://en.wikipedia.org/wiki/Selenium_%28software%29#History&#34;&gt;incredibly&lt;/a&gt; clever:&lt;/p&gt;
@@ -224,8 +307,7 @@
 
 &lt;p&gt;Most webpages contain repeated blocks that can be abstracted into a single PageObject class. Makes sense when you look at the following screenshot:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://nadavc.com/imgs/selenium-repeated-objects.png&#34; alt=&#34;Repeated blocks&#34; /&gt;
-&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://nadavc.github.io/imgs/selenium-repeated-objects.png&#34; alt=&#34;Repeated blocks&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;But how do you tell Selenium to confine @FindBy to search &lt;em&gt;only&lt;/em&gt; for the right &lt;code&gt;.repo-list-name&lt;/code&gt;? Luckily, Selenium supports the notion of &lt;code&gt;context&lt;/code&gt; - whereas you get to define the root of @FindBy’s search. The trick is to call &lt;code&gt;PageFactory.initElements()&lt;/code&gt; with a custom &lt;code&gt;ElementLocatorFactory&lt;/code&gt;. See &lt;code&gt;SearchSegment.java&lt;/code&gt; for a more concrete example.&lt;/p&gt;
 
@@ -243,10 +325,10 @@
     
     <item>
       <title>Genesis</title>
-      <link>http://nadavc.com/posts/genesis/</link>
+      <link>http://nadavc.github.io/posts/genesis/</link>
       <pubDate>Sun, 15 Mar 2015 01:46:11 -0700</pubDate>
       
-      <guid>http://nadavc.com/posts/genesis/</guid>
+      <guid>http://nadavc.github.io/posts/genesis/</guid>
       <description>&lt;p&gt;This is my third attempt at a blog. Why start another one? I have plenty of reasons &lt;strong&gt;not&lt;/strong&gt; to. It&amp;rsquo;s time consuming, difficult, irrelevant, boring, repetitive…  But I also have good reasons. I want to improve at articulating my ideas and keep a journal of my learnings (professionally or otherwise). I will try my best to post original content and stay out of clichés, but I can&amp;rsquo;t promise anything :-)&lt;/p&gt;
 </description>
     </item>

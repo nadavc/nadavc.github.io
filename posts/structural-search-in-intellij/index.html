@@ -7,17 +7,17 @@
 <title>
   IntelliJ Gem: Structural Search
 </title>
-<link rel="stylesheet" href="http://nadavc.com//css/reset.css">
-<script src="http://nadavc.com//js/highlight.pack.js"></script>
-<link rel="stylesheet" href="http://nadavc.com//css/github.css">
+<link rel="stylesheet" href="http://nadavc.github.io//css/reset.css">
+<script src="http://nadavc.github.io//js/highlight.pack.js"></script>
+<link rel="stylesheet" href="http://nadavc.github.io//css/github.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,700,300italic,700italic" rel="stylesheet" type="text/css">
-<link href="http://nadavc.com//css/hover.css" rel="stylesheet" media="all">
-<link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://nadavc.com//apple-touch-icon-144-precomposed.png">
-<link rel="shortcut icon" href="http://nadavc.com//favicon.ico">
+<link href="http://nadavc.github.io//css/hover.css" rel="stylesheet" media="all">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://nadavc.github.io//apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="http://nadavc.github.io//favicon.ico">
 <link href="" rel="alternate" type="application/rss+xml" title="@nadavc" />
-<link rel="stylesheet" href="http://nadavc.com//css/layout.css">
+<link rel="stylesheet" href="http://nadavc.github.io//css/layout.css">
 
   <style>
     body {
@@ -66,43 +66,33 @@
 
 <p>Some might say that the controller layer should not access the data layer directly. How would you search for these instances? Structured search makes it easy. In this example, we&rsquo;re searching for all classes that are annotated with <code>@Controller</code> and have a private member that is (<em>or inherits from</em>) a type that contains &ldquo;Repo&rdquo;:</p>
 
-<p><img src="/imgs/ss1_code.png" alt="ss1 code" />
-</p>
+<p><img src="/imgs/ss1_code.png" alt="ss1 code" /></p>
 
-<p><img src="/imgs/ss1_annotation.png" alt="ss1 annotation" />
-</p>
+<p><img src="/imgs/ss1_annotation.png" alt="ss1 annotation" /></p>
 
-<p><img src="/imgs/ss1_type.png" alt="ss1 type" />
-</p>
+<p><img src="/imgs/ss1_type.png" alt="ss1 type" /></p>
 
 <h2 id="finding-candidates-for-god-objects:ae733365846f59b8f5ad0f21c7c9d46c">Finding candidates for God objects</h2>
 
 <p>Every legacy code ends up suffering from the <code>God object</code> code smell. Classes with a large number of methods are very likely to fall into this category. Here&rsquo;s how it&rsquo;s done with structural search.</p>
 
-<p><img src="/imgs/ss2_code.png" alt="ss2 code" />
-</p>
+<p><img src="/imgs/ss2_code.png" alt="ss2 code" /></p>
 
-<p><img src="/imgs/ss2_methodname.png" alt="ss2 code" />
-</p>
+<p><img src="/imgs/ss2_methodname.png" alt="ss2 code" /></p>
 
 <h2 id="finding-inefficient-log-statements:ae733365846f59b8f5ad0f21c7c9d46c">Finding inefficient log statements</h2>
 
 <p>SLF4J recommends we use <a href="http://www.slf4j.org/faq.html#logging_performance">parameterized</a> log entries to improve efficiency. How do we find log entries that use concatenation? Enter <code>Script constraints</code>:</p>
 
-<p><img src="/imgs/ss3_code.png" alt="ss3 code" />
-</p>
+<p><img src="/imgs/ss3_code.png" alt="ss3 code" /></p>
 
-<p><img src="/imgs/ss3_logger.png" alt="ss3 logger" />
-</p>
+<p><img src="/imgs/ss3_logger.png" alt="ss3 logger" /></p>
 
-<p><img src="/imgs/ss3_call.png" alt="ss3 call" />
-</p>
+<p><img src="/imgs/ss3_call.png" alt="ss3 call" /></p>
 
-<p><img src="/imgs/ss3_firstparam_top.png" alt="ss3 params1" />
-</p>
+<p><img src="/imgs/ss3_firstparam_top.png" alt="ss3 params1" /></p>
 
-<p><img src="/imgs/ss3_firstparam_bottom.png" alt="ss3 params2" />
-</p>
+<p><img src="/imgs/ss3_firstparam_bottom.png" alt="ss3 params2" /></p>
 
 <h2 id="wait-what:ae733365846f59b8f5ad0f21c7c9d46c">Wait&hellip; what?</h2>
 
